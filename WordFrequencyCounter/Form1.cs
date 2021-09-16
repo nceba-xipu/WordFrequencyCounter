@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SqlClient;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 namespace WordFrequencyCounter
 {
@@ -26,6 +27,7 @@ namespace WordFrequencyCounter
 
         private void frmLoadBook_Click(object sender, EventArgs e)
         {
+            lblMessage.Text = "";
             OpenFileDialog openFileDialog = new OpenFileDialog();
 
 
@@ -44,26 +46,44 @@ namespace WordFrequencyCounter
 
         private void frmClearText_Click(object sender, EventArgs e)
         {
+            lblMessage.Text = "";
             txtBookText.Clear();
         }
 
         private void btnLoadTopFifty_Click(object sender, EventArgs e)
         {
-            dgvWordFrequency.DataSource = null;
-            dgvWordFrequency.Rows.Clear();
+            lblMessage.Text = "";
+            lblMessage.Text = "Processing...";
+            if (txtBookText.TextLength > 0)
+            {
+                lblMessage.Text = "Processing...";
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
 
-            LoadBook();
 
-            sqlConn.Open();
+                dgvWordFrequency.DataSource = null;
+                dgvWordFrequency.Rows.Clear();
 
-            ClearTable();
-            LoadWordsToDB();
+                LoadBook();
 
-            string strCommand = "SELECT TOP 50 * FROM WordFrequency WHERE Word <> '' ORDER BY Frequency DESC";
-            GetWordList(strCommand);
+                sqlConn.Open();
 
-            sqlConn.Close();
+                ClearTable();
+                LoadWordsToDB();
 
+                string strCommand = "SELECT TOP 50 * FROM WordFrequency WHERE Word <> '' ORDER BY Frequency DESC";
+                GetWordList(strCommand);
+
+                sqlConn.Close();
+
+                stopWatch.Stop();
+                TimeSpan ts = stopWatch.Elapsed;
+                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+                lblMessage.Text = String.Format("Process RunTime: {0} ", elapsedTime);
+
+            }
+            else
+                lblMessage.Text = "Please load book before processing";
         }
 
         void GetWordList(string strCommand)
@@ -80,19 +100,31 @@ namespace WordFrequencyCounter
         {
             string allWords = txtBookText.Text;
             string[] wordsArray = allWords.Split(' ', '.', ',', '!', '-', '"');
+            string[] cleanWords = new string[wordsArray.Length];
+            int i = 0;
 
-             foreach (string w in wordsArray)
+            foreach (string w in wordsArray)
             {
-                WordCounter foundWord = wordCounts.Find(x => x.word == w);
-                if (foundWord == null)
+                if (w.Length > 0)
                 {
-                    wordCounts.Add(new WordCounter(w, 1));
+                    cleanWords[i] = Regex.Replace(w, @"(\s+|@|&|'|\(|\)|<|>|“|”|‘|’|\*|\$|\?|#)", "");
+                    i++;
                 }
-                else
-                {
-                    foundWord.frequency++;
+            }
 
-                }
+            foreach (string w in cleanWords)
+            {
+                    WordCounter foundWord = wordCounts.Find(x => x.word == w);
+                    if (foundWord == null)
+                    {
+                        wordCounts.Add(new WordCounter(w, 1));
+                    }
+                    else
+                    {
+                        foundWord.frequency++;
+
+                    }
+
 
             }
 
@@ -106,13 +138,9 @@ namespace WordFrequencyCounter
 
         void LoadWordsToDB()
         {
-            SqlCommand commClear = new SqlCommand("DELETE FROM WordFrequency", sqlConn);
-            commClear.ExecuteNonQuery();
-
             foreach (WordCounter word in wordCounts)
             {
-                string theWord = word.word.Replace("'", string.Empty);
-                theWord.Trim();
+                string theWord = word.word;
                 int theFrequency = word.frequency;
 
                 SqlCommand command = new SqlCommand("INSERT INTO WordFrequency VALUES ( '" + theWord + "', " + theFrequency + ")", sqlConn);
@@ -125,21 +153,35 @@ namespace WordFrequencyCounter
 
         private void btnLoadWords_Click(object sender, EventArgs e)
         {
-            dgvWordFrequency.DataSource = null;
-            dgvWordFrequency.Rows.Clear();
+            lblMessage.Text = "";
+            lblMessage.Text = "Processing...";
+            if (txtBookText.TextLength > 0)
+            {
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
 
-            LoadBook();
-           
-            sqlConn.Open();
-  
-            ClearTable();
-            LoadWordsToDB();
- 
-            string strCommand = "SELECT * FROM WordFrequency WHERE LEN(Word) > 6 ORDER BY Frequency DESC";
-            GetWordList(strCommand);
+                dgvWordFrequency.DataSource = null;
+                dgvWordFrequency.Rows.Clear();
 
-            sqlConn.Close();
+                LoadBook();
 
+                sqlConn.Open();
+
+                ClearTable();
+                LoadWordsToDB();
+
+                string strCommand = "SELECT * FROM WordFrequency WHERE LEN(Word) > 6 ORDER BY Frequency DESC";
+                GetWordList(strCommand);
+
+                sqlConn.Close();
+
+                stopWatch.Stop();
+                TimeSpan ts = stopWatch.Elapsed;
+                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}", ts.Hours, ts.Minutes, ts.Seconds, ts.Milliseconds / 10);
+                lblMessage.Text = String.Format("Process RunTime: {0} ", elapsedTime);
+
+            }
+            lblMessage.Text = "Please load book before processing";
         }
     }
 }

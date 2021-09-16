@@ -35,6 +35,7 @@ namespace WordFrequencyCounter
             this.btnLoadTopFifty = new System.Windows.Forms.Button();
             this.dgvWordFrequency = new System.Windows.Forms.DataGridView();
             this.btnLoadWords = new System.Windows.Forms.Button();
+            this.lblMessage = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvWordFrequency)).BeginInit();
             this.SuspendLayout();
             // 
@@ -93,15 +94,25 @@ namespace WordFrequencyCounter
             this.btnLoadWords.Name = "btnLoadWords";
             this.btnLoadWords.Size = new System.Drawing.Size(176, 44);
             this.btnLoadWords.TabIndex = 5;
-            this.btnLoadWords.Text = "Load Words";
+            this.btnLoadWords.Text = "Load Long Words";
             this.btnLoadWords.UseVisualStyleBackColor = true;
             this.btnLoadWords.Click += new System.EventHandler(this.btnLoadWords_Click);
+            // 
+            // lblMessage
+            // 
+            this.lblMessage.AutoSize = true;
+            this.lblMessage.Location = new System.Drawing.Point(340, 28);
+            this.lblMessage.Name = "lblMessage";
+            this.lblMessage.Size = new System.Drawing.Size(13, 20);
+            this.lblMessage.TabIndex = 6;
+            this.lblMessage.Text = " ";
             // 
             // frmWordFrequencyCounter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1204, 797);
+            this.Controls.Add(this.lblMessage);
             this.Controls.Add(this.btnLoadWords);
             this.Controls.Add(this.dgvWordFrequency);
             this.Controls.Add(this.btnLoadTopFifty);
@@ -124,6 +135,7 @@ namespace WordFrequencyCounter
         private System.Windows.Forms.Button btnLoadTopFifty;
         private System.Windows.Forms.DataGridView dgvWordFrequency;
         private System.Windows.Forms.Button btnLoadWords;
+        private System.Windows.Forms.Label lblMessage;
     }
 }
 
